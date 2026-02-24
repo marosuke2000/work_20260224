@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポモドーロタイマー - ゲーミフィケーション</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .stats-header {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #667eea;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .level-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .level-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .xp-bar-container {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .xp-bar {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .timer-section, .achievements-section, .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-display {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            color: #667eea;
+            margin: 30px 0;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .achievement {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .achievement.unlocked {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        }
+        
+        .achievement.locked {
+            opacity: 0.4;
+        }
+        
+        .achievement:hover {
+            transform: scale(1.05);
+        }
+        
+        .achievement-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .achievement-name {
+            font-size: 0.9em;
+            color: #333;
+        }
+        
+        .streak-display {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .streak-value {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .stat-item-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .stat-item-value {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍅 ポモドーロタイマー</h1>
+            <p>集中力を高めて、レベルアップしよう！</p>
+        </header>
+        
+        <div class="level-info">
+            <div class="level-display" id="levelDisplay">レベル 1</div>
+            <div class="xp-bar-container">
+                <div class="xp-bar" id="xpBar">0 / 100 XP</div>
+            </div>
+        </div>
+        
+        <div class="stats-header">
+            <div class="stat-card">
+                <div class="stat-label">総セッション数</div>
+                <div class="stat-value" id="totalSessions">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">総集中時間</div>
+                <div class="stat-value" id="totalTime">0分</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">現在のストリーク</div>
+                <div class="stat-value" id="currentStreak">0🔥</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">最長ストリーク</div>
+                <div class="stat-value" id="longestStreak">0🏆</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="timer-section">
+                <h2>タイマー</h2>
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-controls">
+                    <button id="startBtn" onclick="startTimer()">スタート</button>
+                    <button id="pauseBtn" onclick="pauseTimer()" disabled>一時停止</button>
+                    <button id="resetBtn" onclick="resetTimer()">リセット</button>
+                </div>
+                <div class="streak-display">
+                    <div>🔥 連続達成日数</div>
+                    <div class="streak-value" id="streakDisplay">0</div>
+                    <div>日連続</div>
+                </div>
+            </div>
+            
+            <div class="achievements-section">
+                <h2>達成バッジ</h2>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- 達成バッジが動的に追加される -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <h2>統計情報</h2>
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showStats('weekly')">週間統計</button>
+                <button class="tab-button" onclick="showStats('monthly')">月間統計</button>
+            </div>
+            <div id="statsContent">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-item-label">セッション数</div>
+                        <div class="stat-item-value" id="periodSessions">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item-label">総時間</div>
+                        <div class="stat-item-value" id="periodTime">0分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item-label">平均時間</div>
+                        <div class="stat-item-value" id="periodAvg">0分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item-label">完了率</div>
+                        <div class="stat-item-value" id="periodRate">0%</div>
+                    </div>
+                </div>
+                <div id="chartPlaceholder" style="margin-top: 20px; padding: 40px; background: #f8f9fa; border-radius: 10px; text-align: center; color: #666;">
+                    📊 グラフは統計データが蓄積されると表示されます
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let timerInterval = null;
+        let timeRemaining = 25 * 60; // 25分（秒単位）
+        let isRunning = false;
+        let currentStatsView = 'weekly';
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadAchievements();
+            loadStatistics();
+        });
+        
+        // 統計情報を読み込み
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                // レベル表示
+                document.getElementById('levelDisplay').textContent = `レベル ${stats.level}`;
+                
+                // XPバー
+                const xpBar = document.getElementById('xpBar');
+                const xpProgress = stats.xp_to_next_level === 0 ? 100 : 
+                    ((stats.total_xp - getXpForLevel(stats.level)) / 
+                    (getXpForLevel(stats.level + 1) - getXpForLevel(stats.level))) * 100;
+                xpBar.style.width = `${xpProgress}%`;
+                xpBar.textContent = stats.xp_to_next_level === 0 ? 
+                    'MAX' : `${stats.total_xp} / ${stats.total_xp + stats.xp_to_next_level} XP`;
+                
+                // 統計カード
+                document.getElementById('totalSessions').textContent = stats.total_sessions;
+                document.getElementById('totalTime').textContent = Math.floor(stats.total_focus_time / 60) + '分';
+                document.getElementById('currentStreak').textContent = stats.current_streak + '🔥';
+                document.getElementById('longestStreak').textContent = stats.longest_streak + '🏆';
+                document.getElementById('streakDisplay').textContent = stats.current_streak;
+            } catch (error) {
+                console.error('統計情報の読み込みエラー:', error);
+            }
+        }
+        
+        // レベルに必要なXPを取得
+        function getXpForLevel(level) {
+            const xpTable = {
+                1: 0, 2: 100, 3: 250, 4: 500, 5: 850,
+                6: 1300, 7: 1850, 8: 2500, 9: 3250, 10: 4100
+            };
+            return xpTable[level] || 4100;
+        }
+        
+        // 達成バッジを読み込み
+        async function loadAchievements() {
+            try {
+                const response = await fetch('/api/achievements');
+                const achievements = await response.json();
+                
+                const grid = document.getElementById('achievementsGrid');
+                grid.innerHTML = '';
+                
+                achievements.forEach(achievement => {
+                    const div = document.createElement('div');
+                    div.className = `achievement ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+                    div.innerHTML = `
+                        <div class="achievement-icon">${achievement.icon}</div>
+                        <div class="achievement-name">${achievement.description}</div>
+                    `;
+                    grid.appendChild(div);
+                });
+            } catch (error) {
+                console.error('達成バッジの読み込みエラー:', error);
+            }
+        }
+        
+        // 統計情報を読み込み
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics');
+                const statistics = await response.json();
+                
+                updateStatsDisplay(statistics);
+            } catch (error) {
+                console.error('統計の読み込みエラー:', error);
+            }
+        }
+        
+        // 統計表示を更新
+        function updateStatsDisplay(statistics) {
+            const data = currentStatsView === 'weekly' ? statistics.weekly : statistics.monthly;
+            
+            document.getElementById('periodSessions').textContent = data.total_sessions;
+            document.getElementById('periodTime').textContent = Math.floor(data.total_time / 60) + '分';
+            document.getElementById('periodAvg').textContent = Math.floor(data.avg_time / 60) + '分';
+            
+            const expectedSessions = currentStatsView === 'weekly' ? 7 : 30;
+            const rate = Math.min(100, Math.floor((data.total_sessions / expectedSessions) * 100));
+            document.getElementById('periodRate').textContent = rate + '%';
+        }
+        
+        // 統計ビュー切り替え
+        function showStats(view) {
+            currentStatsView = view;
+            
+            // ボタンのアクティブ状態を更新
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            loadStatistics();
+        }
+        
+        // タイマー開始
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            
+            timerInterval = setInterval(() => {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                } else {
+                    completeSession();
+                }
+            }, 1000);
+        }
+        
+        // タイマー一時停止
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
+        
+        // タイマーリセット
+        function resetTimer() {
+            pauseTimer();
+            timeRemaining = 25 * 60;
+            updateTimerDisplay();
+        }
+        
+        // タイマー表示更新
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // セッション完了
+        async function completeSession() {
+            pauseTimer();
+            
+            try {
+                const response = await fetch('/api/complete_session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        duration: 25 * 60
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // 通知を表示
+                showNotification(result);
+                
+                // 統計を更新
+                await loadStats();
+                await loadAchievements();
+                await loadStatistics();
+                
+                // タイマーリセット
+                timeRemaining = 25 * 60;
+                updateTimerDisplay();
+            } catch (error) {
+                console.error('セッション完了エラー:', error);
+            }
+        }
+        
+        // 通知を表示
+        function showNotification(result) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            let content = `
+                <h3>🎉 ポモドーロ完了！</h3>
+                <p>+${result.xp_earned} XP 獲得</p>
+            `;
+            
+            if (result.level_up) {
+                content += `<p><strong>🎊 レベルアップ！レベル ${result.level} になりました！</strong></p>`;
+            }
+            
+            if (result.newly_unlocked && result.newly_unlocked.length > 0) {
+                content += '<p><strong>新しいバッジを獲得！</strong></p>';
+                result.newly_unlocked.forEach(achievement => {
+                    content += `<p>${achievement.icon} ${achievement.description}</p>`;
+                });
+            }
+            
+            if (result.current_streak > 0) {
+                content += `<p>🔥 ${result.current_streak}日連続！</p>`;
+            }
+            
+            notification.innerHTML = content;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
