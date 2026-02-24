@@ -348,4 +348,6 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
+    # 注意: デバッグモードは開発環境でのみ使用してください
+    # 本番環境では debug=False に設定するか、環境変数で制御してください
     app.run(debug=True, host='0.0.0.0', port=5000)
