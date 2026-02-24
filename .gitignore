@@ -6,6 +6,8 @@ dist/
 build/
 .pytest_cache/
 *.db
+.coverage
+htmlcov/
 
 # Node
 node_modules/
