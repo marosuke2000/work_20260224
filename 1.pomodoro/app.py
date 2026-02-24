@@ -141,7 +141,7 @@ class GamificationSystem:
         today = datetime.utcnow().date()
         week_start = today - timedelta(days=today.weekday())
         count = PomodoroSession.query.filter(
-            PomodoroSession.completed == True,
+            PomodoroSession.completed.is_(True),
             PomodoroSession.timestamp >= datetime.combine(week_start, datetime.min.time())
         ).count()
         return count
@@ -263,14 +263,14 @@ def get_statistics():
     # 週間統計（過去7日）
     week_start = today - timedelta(days=6)
     weekly_sessions = PomodoroSession.query.filter(
-        PomodoroSession.completed == True,
+        PomodoroSession.completed.is_(True),
         PomodoroSession.timestamp >= datetime.combine(week_start, datetime.min.time())
     ).all()
     
     # 月間統計（過去30日）
     month_start = today - timedelta(days=29)
     monthly_sessions = PomodoroSession.query.filter(
-        PomodoroSession.completed == True,
+        PomodoroSession.completed.is_(True),
         PomodoroSession.timestamp >= datetime.combine(month_start, datetime.min.time())
     ).all()
     

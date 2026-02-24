@@ -349,8 +349,8 @@
         <div class="stats-section">
             <h2>統計情報</h2>
             <div class="tab-buttons">
-                <button class="tab-button active" onclick="showStats('weekly')">週間統計</button>
-                <button class="tab-button" onclick="showStats('monthly')">月間統計</button>
+                <button class="tab-button active" onclick="showStats('weekly', event)">週間統計</button>
+                <button class="tab-button" onclick="showStats('monthly', event)">月間統計</button>
             </div>
             <div id="statsContent">
                 <div class="stats-grid">
@@ -478,7 +478,7 @@
         }
         
         // 統計ビュー切り替え
-        function showStats(view) {
+        function showStats(view, event) {
             currentStatsView = view;
             
             // ボタンのアクティブ状態を更新
